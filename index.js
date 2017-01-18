@@ -135,17 +135,13 @@ module.exports = function (session) {
       fn = params;
       params = [];
     }
-    this.pg.connect(this.conString, function (err, client, done) {
+
+    this.pg.query(query, params, function (err, result) {
       if (err) {
-        done(client);
-        if (fn) { fn(err); }
-      } else {
-        client.query(query, params || [], function (err, result) {
-          done(err || false);
-          if (fn) { fn(err, result && result.rows[0] ? result.rows[0] : false); }
-        });
+        return fn(err);
       }
-    });
+      return fn(null, (result && result.rows[0] ? result.rows[0] : false));
+  });
   };
 
   /**
